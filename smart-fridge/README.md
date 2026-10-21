@@ -114,8 +114,3 @@ smart-fridge/
 3. **新頁面新增**：在 `views/` 建立 `.vue` 檔後，記得去 `router/index.js` 註冊路由，並在 `DefaultLayout.vue` 的側邊選單與手機選單加入連結。
 4. **彈窗規範**：請統一使用 `<el-dialog class="custom-app-dialog">` 以維持全站彈窗 UI 的一致性，避免使用原生的 `ElMessageBox`。
 5. **資料儲存**：目前登入狀態、深淺色模式、自訂食材與冰箱結構皆使用 `localStorage` 儲存，重整頁面不會消失。
-```
-
----
-
-這份 `README.md` 清楚交代了專案的技術棧、啟動方式、目錄結構（包含我們辛苦拆分出來的各項 Store 與 View）以及五大亮點。直接貼上即可使用！
