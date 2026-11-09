@@ -1,0 +1,92 @@
+/* =========================================
+   基礎樣式重置
+   ========================================= */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', sans-serif;
+  background-color: var(--el-bg-color-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   長輩友善模式 (Elder Mode)
+   透過覆寫 Element Plus 變數與強制指定大小來實現
+   ========================================= */
+html.elder-mode {
+  /* 1. 放大基礎字體變數 */
+  --el-font-size-base: 18px;
+  --el-font-size-large: 20px;
+  --el-font-size-small: 16px;
+  --el-font-size-extra-large: 24px;
+
+  /* 2. 放大按鈕的 Padding 與高度 */
+  --el-button-padding: 12px 24px;
+  --el-button-size: 44px;
+}
+
+/* 針對特定 HTML 標籤強制放大 */
+html.elder-mode h1 { font-size: 32px; }
+html.elder-mode h2 { font-size: 26px; }
+html.elder-mode h3 { font-size: 22px; }
+html.elder-mode h4 { font-size: 18px; }
+
+/* 強制放大 Element Plus 按鈕 */
+html.elder-mode .el-button {
+  font-size: 18px;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 8px;
+}
+
+/* 強制放大輸入框與下拉選單 */
+html.elder-mode .el-input__wrapper,
+html.elder-mode .el-select__wrapper {
+  padding: 8px 16px;
+  font-size: 18px;
+  min-height: 48px;
+}
+
+/* 強制放大標籤 (Tag) */
+html.elder-mode .el-tag {
+  font-size: 16px;
+  padding: 4px 12px;
+  height: auto;
+}
+
+/* 強制放大表格內文字 */
+html.elder-mode .el-table {
+  font-size: 16px;
+}
+html.elder-mode .el-table th,
+html.elder-mode .el-table td {
+  padding: 16px 0;
+}
+
+/* 調整彈窗與卡片內距，避免字體變大後太擁擠 */
+html.elder-mode .el-dialog__body {
+  font-size: 18px;
+}
+html.elder-mode .el-card__body {
+  padding: 24px;
+}
+
+/* 針對側邊選單與導覽列的文字放大 */
+html.elder-mode .el-menu-item,
+html.elder-mode .el-sub-menu__title {
+  font-size: 18px !important;
+  height: 54px !important;
+  line-height: 54px !important;
+}
+
+/* 隱藏過於複雜的圖表或次要資訊 (視需求開啟) */
+/* html.elder-mode .hide-in-elder-mode { display: none !important; } */
