@@ -1,13 +1,120 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh-Hant">
   <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="description" content="鮮知 - 智慧食材管理系統，用手機優先的介面管理冰箱庫存、減少食物浪費" />
+    <meta name="theme-color" content="#C25D3A" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <title>鮮知 - 智慧食材管理系統</title>
+
+    <!--
+      字體鏈：
+      - Fraunces（display，拉丁）→ main.css 的 --font-display 首位
+      - Noto Serif TC（display，繁中）→ 中文標題
+      - DM Sans（body，拉丁）→ main.css 的 --font-body 首位
+      - Noto Sans TC（body，繁中）→ 中文正文
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,800&family=DM+Sans:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    >
+
+    <!-- 長輩模式預載：在 Vue 掛載前先套用，避免閃爍 -->
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('elderMode') === 'true') {
+            document.documentElement.classList.add('elder-mode')
+          }
+        } catch (e) {}
+      })()
+    </script>
+
+    <!-- PWA manifest 待後續 Phase 啟用 -->
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div id="app-loading">
+        <div class="app-loading-inner">
+          <div class="app-loading-title">鮮知</div>
+          <div class="app-loading-subtitle">智慧食材管理系統</div>
+          <div class="app-loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <noscript>
+      <div style="padding: 40px; text-align: center; font-family: sans-serif;">
+        <h2>需要啟用 JavaScript</h2>
+        <p>鮮知智慧食材管理系統需要 JavaScript 才能運作，請在瀏覽器設定中啟用 JavaScript 後重新整理本頁。</p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.js"></script>
+
+    <style>
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #F5F3EF;
+        z-index: 9999;
+      }
+      .app-loading-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .app-loading-title {
+        font-family: 'Fraunces', 'Noto Serif TC', serif;
+        font-size: 40px;
+        font-weight: 700;
+        color: #211F1C;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+      .app-loading-subtitle {
+        font-family: 'DM Sans', 'Noto Sans TC', sans-serif;
+        font-size: 13px;
+        color: #73706C;
+        letter-spacing: 0.06em;
+      }
+      .app-loading-spinner {
+        margin-top: 20px;
+        width: 24px;
+        height: 24px;
+        border: 2px solid rgba(194, 93, 58, 0.18);
+        border-top-color: #C25D3A;
+        border-radius: 50%;
+        animation: app-loading-spin 0.8s linear infinite;
+      }
+      @keyframes app-loading-spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .app-loading-spinner { animation: none; border-top-color: transparent; }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        #app-loading { background: #1A1A1A; }
+        .app-loading-title { color: #F5F3EF; }
+        .app-loading-subtitle { color: #9A9690; }
+        .app-loading-spinner {
+          border-color: rgba(210, 125, 95, 0.25);
+          border-top-color: #D27D5F;
+        }
+      }
+    </style>
   </body>
 </html>

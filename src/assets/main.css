@@ -1,92 +1,916 @@
 /* =========================================
-   基礎樣式重置
-   ========================================= */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Helvetica Neue', Helvetica, 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', sans-serif;
-  background-color: var(--el-bg-color-page);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+   鮮知 - 核心設計代幣 (Design Tokens)
+   預設主題：南歐莊園（赤陶橙）
+   擴充主題：霧灰藍、莫蘭迪粉、科技綠、曜石黑、琥珀暖木
 
-#app {
-  width: 100%;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+   v2 響應式基礎：
+   - 流體字階 / 間距（clamp）
+   - 佈局、安全區、觸控、層級 token
+   - 手機端 Element Plus 覆寫
+   - 通用工具類（page-container / responsive-table / mobile-only）
+   ========================================= */
+
+:root {
+  color-scheme: light;
+
+  /* --- 顏色：預設赤陶橙 (Terracotta) --- */
+  --ground: #F5F3EF;
+  --surface: #FAF9F7;
+  --surface-hover: #F0EDE8;
+  --ink: #211F1C;
+  --muted: #73706C;
+  --border: #E7E5E4;
+  --border-light: #F0EDE8;
+  --accent: #C25D3A;
+  --accent-hover: #A94B2B;
+  --accent-light: #F9EAE5;
+  --sage: #5A6B53;
+  --danger: #B83B3B;
+  --warning: #D9A066;
+
+  /* --- 冰箱材質 --- */
+  --fridge-body: #E2DCD3;
+  --fridge-frame: #D1C9BC;
+  --fridge-shelf: #FDFBF7;
+  --fridge-light: rgba(255, 255, 255, 0.3);
+
+  /* --- 字體 --- */
+  --font-display: 'Fraunces', 'Noto Serif TC', 'Songti TC', 'PingFang TC', serif;
+  --font-body: 'DM Sans', 'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', sans-serif;
+
+  /* --- 1.333 比例流體字階 ---
+     手機自動降級，桌面維持原本尺度
+     hero  : 36px → 64px
+     2xl   : 28px → 37.9px
+     xl    : 22px → 28.4px
+     lg    : 18px → 21.3px
+     base  : 16px 固定
+     sm/xs : 固定，作輔助文字
+  */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: clamp(1.125rem, 2.2vw, 1.333rem);
+  --text-xl: clamp(1.375rem, 3vw, 1.777rem);
+  --text-2xl: clamp(1.75rem, 5vw, 2.369rem);
+  --text-hero: clamp(2.25rem, 7vw, 4rem);
+
+  /* --- 間距 (4pt) ---
+     1~4 為基礎柵格固定；5~10 流體，避免手機被大留白吃掉
+  */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: clamp(16px, 4vw, 24px);
+  --space-6: clamp(20px, 5vw, 32px);
+  --space-8: clamp(28px, 7vw, 48px);
+  --space-10: clamp(36px, 9vw, 64px);
+
+  /* --- 圓角尺度 --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-round: 9999px;
+
+  /* --- 陰影配方 --- */
+  --shadow-sm: 0 1px 2px rgba(33, 31, 28, 0.04);
+  --shadow-md: 0 4px 12px rgba(33, 31, 28, 0.06);
+  --shadow-lg: 0 12px 32px rgba(33, 31, 28, 0.10);
+
+  /* --- 動效 --- */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-fast: 150ms var(--ease-out);
+  --transition-base: 250ms var(--ease-out);
+
+  /* --- 佈局 --- */
+  --content-max: 1280px;       /* 桌面內容最大寬 */
+  --content-narrow: 720px;     /* 文檔 / 表單頁 */
+  --page-pad-x: clamp(16px, 4vw, 32px);
+  --header-h: 56px;
+  --bottom-nav-h: 56px;
+
+  /* --- 安全區 --- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* --- 觸控 --- */
+  --tap-min: 44px;
+
+  /* --- 層級 --- */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-header: 100;
+  --z-drawer: 200;
+  --z-dialog: 300;
+  --z-toast: 3000;
+  --z-tour: 4000;
+
+  /* --- 斷點文件（CSS 變數不能進 media query，供 JS 讀取）---
+     --bp-sm: 480; --bp-md: 768; --bp-lg: 1024; --bp-xl: 1280;
+  */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+
+  /* --- Element Plus 映射 --- */
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #D27D5F;
+  --el-color-primary-light-5: #E1A18A;
+  --el-color-primary-light-7: #F0C5B8;
+  --el-color-primary-light-8: #F5D8CB;
+  --el-color-primary-light-9: var(--accent-light);
+  --el-color-success: var(--sage);
+  --el-color-success-light-9: #EEF1ED;
+  --el-color-warning: var(--warning);
+  --el-color-warning-light-9: #FBF5EE;
+  --el-color-warning-dark-2: #B8875A;
+  --el-color-danger: var(--danger);
+  --el-color-danger-light-9: #F9EBEB;
+  --el-color-danger-dark-2: #A03232;
+
+  --el-bg-color: var(--surface);
+  --el-bg-color-page: var(--ground);
+  --el-bg-color-overlay: var(--surface);
+  --el-text-color-primary: var(--ink);
+  --el-text-color-regular: var(--muted);
+  --el-text-color-secondary: #9A9690;
+  --el-text-color-placeholder: #BDB9B2;
+  --el-border-color: var(--border);
+  --el-border-color-light: var(--border-light);
+  --el-border-radius-base: var(--radius-md);
+  --el-font-family: var(--font-body);
 }
 
 /* =========================================
-   長輩友善模式 (Elder Mode)
-   透過覆寫 Element Plus 變數與強制指定大小來實現
+   主題 1：霧灰藍 (Mist Blue) - 理智、專注
+   ========================================= */
+.theme-mist-blue {
+  --ground: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-hover: #F1F5F9;
+  --ink: #0F172A;
+  --muted: #64748B;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-light: #EFF6FF;
+  --sage: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #60A5FA;
+  --el-color-primary-light-5: #93C5FD;
+  --el-color-primary-light-7: #BFDBFE;
+  --el-color-primary-light-8: #DBEAFE;
+  --el-color-primary-light-9: var(--accent-light);
+  --el-color-success: var(--sage);
+  --el-color-success-light-9: #ECFDF5;
+  --el-color-warning: var(--warning);
+  --el-color-warning-light-9: #FFFBEB;
+  --el-color-danger: var(--danger);
+  --el-color-danger-light-9: #FEF2F2;
+  --el-text-color-secondary: #94A3B8;
+  --el-text-color-placeholder: #CBD5E1;
+}
+
+/* =========================================
+   主題 2：莫蘭迪粉 (Dusty Rose) - 溫柔、生活感
+   ========================================= */
+.theme-dusty-rose {
+  --ground: #FAF8F5;
+  --surface: #FFFFFF;
+  --surface-hover: #F5F0EA;
+  --ink: #4A4A4A;
+  --muted: #A9A9A9;
+  --border: #EBE5E0;
+  --border-light: #F5F0EA;
+  --accent: #D4A5A5;
+  --accent-hover: #C28A8A;
+  --accent-light: #FDF5F5;
+  --sage: #8FBC8F;
+  --danger: #CD5C5C;
+  --warning: #DEB887;
+
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #E0BABA;
+  --el-color-primary-light-5: #EBCFCF;
+  --el-color-primary-light-7: #F5E4E4;
+  --el-color-primary-light-8: #FAEFEF;
+  --el-color-primary-light-9: var(--accent-light);
+  --el-color-success: var(--sage);
+  --el-color-success-light-9: #F0F8F0;
+  --el-color-warning: var(--warning);
+  --el-color-warning-light-9: #FDF8F0;
+  --el-color-danger: var(--danger);
+  --el-color-danger-light-9: #FAEDED;
+  --el-text-color-secondary: #BDBDBD;
+  --el-text-color-placeholder: #D3D3D3;
+}
+
+/* =========================================
+   主題 3：科技綠 (Emerald Tech) - 健康、新鮮
+   ========================================= */
+.theme-emerald-tech {
+  --ground: #F3F7F4;
+  --surface: #FFFFFF;
+  --surface-hover: #E9F0EB;
+  --ink: #1A2E22;
+  --muted: #6B7F73;
+  --border: #D1E0D6;
+  --border-light: #E9F0EB;
+  --accent: #059669;
+  --accent-hover: #047857;
+  --accent-light: #ECFDF5;
+  --sage: #34D399;
+  --danger: #DC2626;
+  --warning: #D97706;
+
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #34D399;
+  --el-color-primary-light-5: #6EE7B7;
+  --el-color-primary-light-7: #A7F3D0;
+  --el-color-primary-light-8: #D1FAE5;
+  --el-color-primary-light-9: var(--accent-light);
+  --el-color-success: var(--sage);
+  --el-color-success-light-9: #ECFDF5;
+  --el-color-warning: var(--warning);
+  --el-color-warning-light-9: #FFFBEB;
+  --el-color-danger: var(--danger);
+  --el-color-danger-light-9: #FEF2F2;
+  --el-text-color-secondary: #88A894;
+  --el-text-color-placeholder: #B4C9BC;
+}
+
+/* =========================================
+   主題 4：曜石黑 (Obsidian) - 極致專注、護眼
+   ========================================= */
+.theme-obsidian {
+  color-scheme: dark;
+  --ground: #0F1115;
+  --surface: #181B22;
+  --surface-hover: #222731;
+  --ink: #F3F4F6;
+  --muted: #9CA3AF;
+  --border: #2D3341;
+  --border-light: #222731;
+  --accent: #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-light: rgba(99, 102, 241, 0.15);
+  --sage: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+
+  --fridge-body: #1A1D24;
+  --fridge-frame: #111318;
+  --fridge-shelf: #222731;
+  --fridge-light: rgba(255, 255, 255, 0.02);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.8);
+
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #818CF8;
+  --el-color-primary-light-5: #A5B4FC;
+  --el-color-primary-light-7: #C7D2FE;
+  --el-color-primary-light-8: #E0E7FF;
+  --el-color-primary-light-9: var(--accent-light);
+  --el-color-success: var(--sage);
+  --el-color-success-light-9: rgba(16, 185, 129, 0.15);
+  --el-color-warning: var(--warning);
+  --el-color-warning-light-9: rgba(245, 158, 11, 0.15);
+  --el-color-danger: var(--danger);
+  --el-color-danger-light-9: rgba(239, 68, 68, 0.15);
+
+  --el-bg-color: var(--surface);
+  --el-bg-color-page: var(--ground);
+  --el-bg-color-overlay: var(--surface);
+  --el-text-color-primary: var(--ink);
+  --el-text-color-regular: var(--muted);
+  --el-text-color-secondary: #6B7280;
+  --el-text-color-placeholder: #4B5563;
+  --el-border-color: var(--border);
+  --el-border-color-light: var(--border-light);
+  --el-fill-color-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-lighter: rgba(255, 255, 255, 0.02);
+}
+
+/* =========================================
+   主題 5：琥珀暖木 (Warm Amber) - 大地色、質樸
+   ========================================= */
+.theme-warm-amber {
+  --ground: #FDFBF7;
+  --surface: #FFFFFF;
+  --surface-hover: #F7F2EA;
+  --ink: #2D2621;
+  --muted: #8C7E74;
+  --border: #E8DFD3;
+  --border-light: #F7F2EA;
+  --accent: #D97706;
+  --accent-hover: #B45309;
+  --accent-light: #FEF3C7;
+  --sage: #65A30D;
+  --danger: #BE123C;
+  --warning: #F59E0B;
+
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #F59E0B;
+  --el-color-primary-light-5: #FBBF24;
+  --el-color-primary-light-7: #FCD34D;
+  --el-color-primary-light-8: #FDE68A;
+  --el-color-primary-light-9: var(--accent-light);
+  --el-color-success: var(--sage);
+  --el-color-success-light-9: #F7FEE7;
+  --el-color-warning: var(--warning);
+  --el-color-warning-light-9: #FFFBEB;
+  --el-color-danger: var(--danger);
+  --el-color-danger-light-9: #FFF1F2;
+  --el-text-color-secondary: #A89B92;
+  --el-text-color-placeholder: #CBBDB4;
+}
+
+/* =========================================
+   系統級深色模式 (配合 prefers-color-scheme)
+   ========================================= */
+html.dark {
+  color-scheme: dark;
+
+  /* 統一使用中性深灰背景，凸顯主題的強調色 */
+  --ground: #121212;
+  --surface: #1E1E1E;
+  --surface-hover: #2A2A2A;
+  --ink: #F3F4F6;
+  --muted: #9CA3AF;
+  --border: #333333;
+  --border-light: #2A2A2A;
+
+  --fridge-body: #1A1D24;
+  --fridge-frame: #111318;
+  --fridge-shelf: #222731;
+  --fridge-light: rgba(255, 255, 255, 0.02);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.8);
+
+  /* Element Plus 基礎深色映射 */
+  --el-bg-color: var(--surface);
+  --el-bg-color-page: var(--ground);
+  --el-bg-color-overlay: var(--surface);
+  --el-text-color-primary: var(--ink);
+  --el-text-color-regular: var(--muted);
+  --el-text-color-secondary: #6B7280;
+  --el-text-color-placeholder: #4B5563;
+  --el-border-color: var(--border);
+  --el-border-color-light: var(--border-light);
+  --el-fill-color-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-lighter: rgba(255, 255, 255, 0.02);
+}
+
+/* 預設主題（赤陶橙）的深色強調色適配 */
+html.dark:not(.theme-mist-blue):not(.theme-dusty-rose):not(.theme-emerald-tech):not(.theme-obsidian):not(.theme-warm-amber) {
+  --accent: #D27D5F;
+  --accent-hover: #E1A18A;
+  --accent-light: rgba(210, 125, 95, 0.15);
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #E1A18A;
+  --el-color-primary-light-5: #C98770;
+  --el-color-primary-light-7: #A66A57;
+  --el-color-primary-light-8: #8C5546;
+  --el-color-primary-light-9: rgba(210, 125, 95, 0.15);
+}
+
+/* 霧灰藍深色適配 */
+html.dark.theme-mist-blue {
+  --accent: #60A5FA;
+  --accent-hover: #93C5FD;
+  --accent-light: rgba(96, 165, 250, 0.15);
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #93C5FD;
+  --el-color-primary-light-5: #BFDBFE;
+  --el-color-primary-light-7: #DBEAFE;
+  --el-color-primary-light-8: #EFF6FF;
+  --el-color-primary-light-9: rgba(96, 165, 250, 0.15);
+}
+
+/* 莫蘭迪粉深色適配 */
+html.dark.theme-dusty-rose {
+  --accent: #E0BABA;
+  --accent-hover: #EBCFCF;
+  --accent-light: rgba(224, 186, 186, 0.15);
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #EBCFCF;
+  --el-color-primary-light-5: #F5E4E4;
+  --el-color-primary-light-7: #FDF5F5;
+  --el-color-primary-light-8: #FAEFEF;
+  --el-color-primary-light-9: rgba(224, 186, 186, 0.15);
+}
+
+/* 科技綠深色適配 */
+html.dark.theme-emerald-tech {
+  --accent: #34D399;
+  --accent-hover: #6EE7B7;
+  --accent-light: rgba(52, 211, 153, 0.15);
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #6EE7B7;
+  --el-color-primary-light-5: #A7F3D0;
+  --el-color-primary-light-7: #D1FAE5;
+  --el-color-primary-light-8: #ECFDF5;
+  --el-color-primary-light-9: rgba(52, 211, 153, 0.15);
+}
+
+/* 琥珀暖木深色適配 */
+html.dark.theme-warm-amber {
+  --accent: #F59E0B;
+  --accent-hover: #FBBF24;
+  --accent-light: rgba(245, 158, 11, 0.15);
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #FBBF24;
+  --el-color-primary-light-5: #FCD34D;
+  --el-color-primary-light-7: #FDE68A;
+  --el-color-primary-light-8: #FEF3C7;
+  --el-color-primary-light-9: rgba(245, 158, 11, 0.15);
+}
+
+/* =========================================
+   全域重置
+   ========================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip; /* 防止 position: sticky 被破壞 */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  background-color: var(--ground);
+  color: var(--ink);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--accent-light);
+  color: var(--ink);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-top: 0;
+  margin-bottom: var(--space-3);
+  overflow-wrap: anywhere;
+}
+h1 { font-size: var(--text-2xl); letter-spacing: -0.02em; }
+h2 { font-size: var(--text-xl); letter-spacing: -0.015em; }
+h3 { font-size: var(--text-lg); letter-spacing: -0.01em; }
+h4 { font-size: var(--text-base); letter-spacing: 0; }
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* =========================================
+   佈局工具類
+   ========================================= */
+.page-container {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--page-pad-x);
+}
+.page-container--narrow {
+  max-width: var(--content-narrow);
+}
+
+.safe-bottom {
+  padding-bottom: calc(var(--space-4) + var(--safe-bottom));
+}
+.safe-top {
+  padding-top: calc(var(--space-4) + var(--safe-top));
+}
+
+/* 手機 / 桌面顯示切換 */
+.mobile-only { display: none !important; }
+@media (max-width: 768px) {
+  .mobile-only { display: revert !important; }
+  .desktop-only { display: none !important; }
+}
+
+/* 通用表格轉卡片（原生 table，需在 td 加 data-label） */
+@media (max-width: 768px) {
+  .responsive-table table,
+  table.responsive-table {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table thead,
+  table.responsive-table thead { display: none; }
+  .responsive-table tbody,
+  table.responsive-table tbody { display: block; }
+  .responsive-table tr,
+  table.responsive-table tr {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  .responsive-table td,
+  table.responsive-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-1) 0;
+    border: none;
+    text-align: right;
+  }
+  .responsive-table td::before,
+  table.responsive-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+    text-align: left;
+  }
+}
+
+/* =========================================
+   Element Plus 元件覆寫（桌面基礎）
+   ========================================= */
+.el-button {
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.02em;
+  min-height: 36px;
+  transition: transform var(--transition-fast),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast);
+  border: 1px solid transparent;
+}
+.el-button--primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #FFFFFF;
+}
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.el-button--success { background-color: var(--sage); border-color: var(--sage); color: #FFF; }
+.el-button--warning { background-color: var(--warning); border-color: var(--warning); color: #FFF; }
+.el-button--danger { background-color: var(--danger); border-color: var(--danger); color: #FFF; }
+.el-button.is-plain { background-color: transparent; }
+.el-button--primary.is-plain { color: var(--accent); border-color: var(--accent); }
+.el-button--primary.is-plain:hover { background-color: var(--accent-light); color: var(--accent-hover); }
+.el-button--success.is-plain { color: var(--sage); border-color: var(--sage); }
+.el-button--success.is-plain:hover { background-color: var(--el-color-success-light-9); }
+.el-button--warning.is-plain { color: var(--warning); border-color: var(--warning); }
+.el-button--warning.is-plain:hover { background-color: var(--el-color-warning-light-9); }
+.el-button--danger.is-plain { color: var(--danger); border-color: var(--danger); }
+.el-button--danger.is-plain:hover { background-color: var(--el-color-danger-light-9); }
+.el-button.is-link { border: none; background: transparent; padding: 0; height: auto; min-height: 0; }
+.el-button.is-link:hover { transform: none; }
+
+.el-input__wrapper,
+.el-textarea__inner {
+  background-color: var(--surface) !important;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 1px var(--border) inset, 0 1px 2px rgba(0, 0, 0, 0.02) inset;
+  transition: box-shadow var(--transition-fast);
+}
+.el-input__wrapper:hover,
+.el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px var(--muted) inset;
+}
+.el-input__wrapper.is-focus,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 2px var(--accent) inset !important;
+}
+
+.el-input-number { width: 120px; }
+.el-input-number__decrease,
+.el-input-number__increase {
+  width: 32px !important;
+  background-color: var(--ground) !important;
+  border: none !important;
+  color: var(--ink) !important;
+  font-size: 14px;
+}
+.el-input-number__decrease:hover,
+.el-input-number__increase:hover { color: var(--accent) !important; }
+.el-input-number .el-input__wrapper {
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+.el-input-number .el-input__inner {
+  text-align: center;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+
+.el-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base),
+              border-color var(--transition-base);
+}
+.el-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border);
+}
+.el-card__header {
+  border-bottom: 1px solid var(--border-light);
+  padding: var(--space-4) var(--space-5);
+}
+
+.el-table {
+  --el-table-border-color: var(--border-light);
+  --el-table-header-bg-color: var(--ground);
+  --el-table-row-hover-bg-color: var(--surface-hover);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.el-table th.el-table__cell {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.el-dialog {
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+}
+.el-overlay {
+  background-color: rgba(20, 18, 16, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.el-message {
+  position: fixed !important;
+  top: calc(var(--space-5) + var(--safe-top)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 99999 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border) !important;
+  background-color: var(--surface) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* 下拉、DatePicker 等浮層（深色 / 曜石黑） */
+html.dark .el-popper.is-light,
+.theme-obsidian .el-popper.is-light {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+html.dark .el-popper.is-light .el-popper__arrow::before,
+.theme-obsidian .el-popper.is-light .el-popper__arrow::before {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* =========================================
+   手機端 Element Plus 覆寫（≤768px）
+   ========================================= */
+@media (max-width: 768px) {
+  :root {
+    --header-h: 56px;
+    --bottom-nav-h: 56px;
+  }
+
+  /* 按鈕：觸控最小高度 */
+  .el-button {
+    min-height: var(--tap-min);
+    padding-inline: var(--space-4);
+  }
+  .el-button.is-link {
+    min-height: 0;
+    padding-inline: 0;
+  }
+
+  /* 輸入框：避免 iOS 自動縮放（<16px 會觸發） */
+  .el-input__inner,
+  .el-textarea__inner {
+    font-size: 16px !important;
+  }
+
+  /* 數字輸入：不再固定 120px，交給容器 */
+  .el-input-number {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* 卡片內距收斂 */
+  .el-card__header {
+    padding: var(--space-3) var(--space-4);
+  }
+  .el-card__body {
+    padding: var(--space-4);
+  }
+
+  /* Dialog：近全屏、可內部滾動、避免被鍵盤吃掉 */
+  .el-dialog.custom-app-dialog {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px);
+    margin: 12px auto !important;
+    max-height: calc(100dvh - 24px - var(--safe-top) - var(--safe-bottom));
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+  }
+  .el-dialog.custom-app-dialog .el-dialog__header {
+    flex-shrink: 0;
+    padding: var(--space-4) var(--space-4) var(--space-2);
+  }
+  .el-dialog.custom-app-dialog .el-dialog__body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-3) var(--space-4);
+  }
+  .el-dialog.custom-app-dialog .el-dialog__footer {
+    flex-shrink: 0;
+    padding: var(--space-3) var(--space-4)
+             calc(var(--space-3) + var(--safe-bottom));
+  }
+  .el-dialog.custom-app-dialog .el-dialog__footer .el-button {
+    flex: 1;
+  }
+
+  /* 真正全屏的 Dialog（表單 / 長內容） */
+  .el-dialog.custom-app-dialog.dialog-fullscreen-mobile {
+    width: 100vw !important;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0 !important;
+    border-radius: 0;
+    border: none;
+  }
+
+  /* Drawer：不超過視窗寬 */
+  .el-drawer {
+    max-width: 100vw;
+  }
+
+  /* Message：自適應寬度、不貼邊 */
+  .el-message {
+    width: calc(100vw - 32px) !important;
+    min-width: 0 !important;
+    max-width: 480px;
+  }
+
+  /* 表格：允許橫向滾動，字級收斂 */
+  .el-table {
+    font-size: var(--text-sm);
+  }
+
+  /* 分頁：精簡 */
+  .el-pagination {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .el-pagination .el-pagination__sizes,
+  .el-pagination .el-pagination__jump {
+    display: none;
+  }
+}
+
+/* 極窄手機（≤480px）：再收一級 */
+@media (max-width: 480px) {
+  .el-dialog.custom-app-dialog {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px);
+    margin: 8px auto !important;
+    max-height: calc(100dvh - 16px - var(--safe-top) - var(--safe-bottom));
+  }
+  .el-card__body {
+    padding: var(--space-3);
+  }
+}
+
+/* 觸控裝置：取消 sticky hover 位移 */
+@media (hover: none) and (pointer: coarse) {
+  .el-button--primary:hover,
+  .el-button--primary:focus {
+    transform: none;
+  }
+  .el-card:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--border-light);
+  }
+}
+
+/* 桌面：header 稍高 */
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 64px;
+  }
+}
+
+/* =========================================
+   長輩友善模式
    ========================================= */
 html.elder-mode {
-  /* 1. 放大基礎字體變數 */
+  --text-base: 18px;
+  --text-lg: 24px;
+  --text-xl: 32px;
+  --text-2xl: 40px;
+  --text-hero: 56px;
+  --tap-min: 52px;
   --el-font-size-base: 18px;
-  --el-font-size-large: 20px;
-  --el-font-size-small: 16px;
-  --el-font-size-extra-large: 24px;
-
-  /* 2. 放大按鈕的 Padding 與高度 */
-  --el-button-padding: 12px 24px;
-  --el-button-size: 44px;
 }
-
-/* 針對特定 HTML 標籤強制放大 */
-html.elder-mode h1 { font-size: 32px; }
-html.elder-mode h2 { font-size: 26px; }
-html.elder-mode h3 { font-size: 22px; }
-html.elder-mode h4 { font-size: 18px; }
-
-/* 強制放大 Element Plus 按鈕 */
+html.elder-mode body {
+  line-height: 1.7;
+}
 html.elder-mode .el-button {
   font-size: 18px;
-  height: 48px;
-  padding: 0 24px;
-  border-radius: 8px;
-}
-
-/* 強制放大輸入框與下拉選單 */
-html.elder-mode .el-input__wrapper,
-html.elder-mode .el-select__wrapper {
-  padding: 8px 16px;
-  font-size: 18px;
-  min-height: 48px;
-}
-
-/* 強制放大標籤 (Tag) */
-html.elder-mode .el-tag {
-  font-size: 16px;
-  padding: 4px 12px;
   height: auto;
+  min-height: var(--tap-min);
+  padding: 0 24px;
+}
+html.elder-mode .el-input__wrapper {
+  min-height: var(--tap-min);
 }
 
-/* 強制放大表格內文字 */
-html.elder-mode .el-table {
-  font-size: 16px;
+/* =========================================
+   減少動效回退
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
-html.elder-mode .el-table th,
-html.elder-mode .el-table td {
-  padding: 16px 0;
-}
-
-/* 調整彈窗與卡片內距，避免字體變大後太擁擠 */
-html.elder-mode .el-dialog__body {
-  font-size: 18px;
-}
-html.elder-mode .el-card__body {
-  padding: 24px;
-}
-
-/* 針對側邊選單與導覽列的文字放大 */
-html.elder-mode .el-menu-item,
-html.elder-mode .el-sub-menu__title {
-  font-size: 18px !important;
-  height: 54px !important;
-  line-height: 54px !important;
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
-/* 隱藏過於複雜的圖表或次要資訊 (視需求開啟) */
-/* html.elder-mode .hide-in-elder-mode { display: none !important; } */
+/* =========================================
+   滾動條（僅滑鼠裝置顯示，避免手機佔寬）
+   ========================================= */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+}

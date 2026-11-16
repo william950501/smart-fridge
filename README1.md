@@ -21,7 +21,7 @@
 5. 強制推送到 GitHub (若遇到衝突或需要覆蓋遠端時使用)：
    > git push -u origin main -f
 
-
+ngrok http 80 --url https://roundness-aware-octagon.ngrok-free.dev
 ==================================================
 【二、 專案資料夾結構與作用一覽】
 ==================================================
